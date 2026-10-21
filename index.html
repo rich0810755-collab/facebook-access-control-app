@@ -3,106 +3,83 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#1877f2">
-  <title>Facebook Access</title>
+  <title>Facebook Access Control</title>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      min-height: 100vh;
-      font-family: Arial, Helvetica, sans-serif;
+      padding: 0;
       background: #f0f2f5;
       color: #1c1e21;
-      display: flex;
-      flex-direction: column;
+      font-family: Arial, Helvetica, sans-serif;
     }
 
     header {
       background: #1877f2;
       color: white;
-      padding: 20px;
       text-align: center;
-      font-size: 27px;
+      padding: 17px;
+      font-size: 29px;
       font-weight: bold;
-      letter-spacing: -1px;
     }
 
     main {
-      width: 100%;
-      max-width: 430px;
-      margin: 36px auto;
-      padding: 0 16px;
-      flex: 1;
+      max-width: 440px;
+      margin: 30px auto;
+      padding: 15px;
     }
 
     .card {
       background: white;
-      padding: 28px 22px;
       border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      padding: 25px 20px;
       text-align: center;
+      box-shadow: 0 2px 10px #00000012;
     }
 
     .logo {
-      width: 64px;
-      height: 64px;
-      margin: 0 auto 18px;
-      border-radius: 50%;
       background: #1877f2;
       color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 45px;
+      width: 65px;
+      height: 65px;
+      line-height: 70px;
+      border-radius: 50%;
+      margin: 0 auto 18px;
+      font-size: 48px;
       font-weight: bold;
     }
 
-    h1 {
-      font-size: 23px;
-      margin: 0 0 12px;
-    }
+    h1 { font-size: 23px; margin: 8px 0 12px; }
 
     p {
       font-size: 15px;
-      line-height: 1.6;
+      line-height: 1.55;
       color: #606770;
     }
 
-    .button {
-      display: block;
+    button {
       width: 100%;
-      padding: 14px 16px;
-      margin-top: 18px;
       border: 0;
       border-radius: 8px;
-      background: #1877f2;
-      color: white;
-      font-size: 16px;
+      padding: 15px 12px;
+      margin-top: 13px;
+      font-size: 15px;
       font-weight: bold;
-      text-decoration: none;
       cursor: pointer;
     }
 
-    .button:disabled {
-      opacity: 0.6;
-      cursor: wait;
-    }
-
-    .secondary {
-      background: #e4e6eb;
-      color: #1c1e21;
-    }
+    .primary { background: #1877f2; color: white; }
+    .secondary { background: #e4e6eb; color: #1c1e21; }
 
     .status {
-      margin-top: 18px;
       padding: 12px;
+      margin-top: 15px;
       border-radius: 8px;
       background: #f0f2f5;
       font-size: 14px;
@@ -110,35 +87,25 @@
       overflow-wrap: anywhere;
     }
 
-    .success {
-      color: #18723b;
-      background: #e9f7ef;
-    }
+    .success { background: #e8f7ed; color: #18723b; }
+    .error { background: #fff0ef; color: #b42318; }
 
-    .error {
-      color: #b42318;
-      background: #fff0ef;
-    }
-
-    .contacts {
-      margin-top: 22px;
-      font-size: 14px;
-    }
-
+    .contacts { margin-top: 20px; font-size: 14px; }
     .contacts a {
       display: inline-block;
-      margin: 7px;
+      margin: 8px 4px;
       color: #1877f2;
       text-decoration: none;
-      font-weight: bold;
     }
 
     footer {
       text-align: center;
+      color: #777;
       padding: 20px;
       font-size: 12px;
-      color: #777;
     }
+
+    [hidden] { display: none !important; }
   </style>
 </head>
 
@@ -150,24 +117,27 @@
       <div class="logo">f</div>
 
       <h1 id="heading">Checking your access...</h1>
-
-      <p id="description">
-        Please wait while we verify your account.
-      </p>
+      <p id="description">Please wait while we verify your account.</p>
 
       <div id="status" class="status" role="status" aria-live="polite">
         Connecting securely...
       </div>
 
-      <button id="continueButton" class="button" hidden>
-        Continue to Facebook
-      </button>
+      <div id="approvedActions" hidden>
+        <button id="insideButton" class="primary">
+          Open Facebook Inside Mini App
+        </button>
 
-      <button id="retryButton" class="button secondary" hidden>
+        <button id="appButton" class="secondary">
+          Open Facebook App
+        </button>
+      </div>
+
+      <button id="retryButton" class="primary" hidden>
         Try Again
       </button>
 
-      <button id="requestButton" class="button secondary" hidden>
+      <button id="requestButton" class="secondary" hidden>
         Request Access
       </button>
 
@@ -176,20 +146,18 @@
         <br>
         <a href="https://t.me/Yangyang_pvt"
            target="_blank" rel="noopener noreferrer">
-          Contact on Telegram
+          Telegram Support
         </a>
         <br>
         <a href="https://wa.me/15795651739"
            target="_blank" rel="noopener noreferrer">
-          Contact on WhatsApp
+          WhatsApp Support
         </a>
       </div>
     </section>
   </main>
 
-  <footer>
-    Access verification provided by Facebook Access Control.
-  </footer>
+  <footer>Facebook Access Control</footer>
 
   <script>
     "use strict";
@@ -204,7 +172,9 @@
     const heading = document.getElementById("heading");
     const description = document.getElementById("description");
     const statusBox = document.getElementById("status");
-    const continueButton = document.getElementById("continueButton");
+    const approvedActions = document.getElementById("approvedActions");
+    const insideButton = document.getElementById("insideButton");
+    const appButton = document.getElementById("appButton");
     const retryButton = document.getElementById("retryButton");
     const requestButton = document.getElementById("requestButton");
     const contacts = document.getElementById("contacts");
@@ -214,54 +184,37 @@
       tg.expand();
     }
 
-    function showStatus(message, type = "") {
+    function setStatus(message, type = "") {
       statusBox.textContent = message;
       statusBox.className = "status" + (type ? " " + type : "");
       statusBox.hidden = false;
     }
 
     function hideActions() {
-      continueButton.hidden = true;
+      approvedActions.hidden = true;
       retryButton.hidden = true;
       requestButton.hidden = true;
       contacts.hidden = true;
     }
 
-    function showError(message, allowRequest = false) {
-      heading.textContent = "Access not available";
-      description.textContent =
-        "Your access could not be confirmed.";
-      showStatus(message, "error");
-
-      retryButton.hidden = false;
-      requestButton.hidden = !allowRequest;
-      contacts.hidden = false;
-    }
-
     async function verifyAccess() {
       hideActions();
-      retryButton.disabled = true;
 
       heading.textContent = "Checking your access...";
-      description.textContent =
-        "Please wait while we verify your account.";
-      showStatus("Connecting securely...");
+      description.textContent = "Please wait while we verify your account.";
+      setStatus("Connecting securely...");
 
       try {
         if (!tg || !tg.initData) {
           throw new Error(
-            "Please open this Mini App from the Telegram bot."
+            "Open this page using the Open App button in your Telegram bot."
           );
         }
 
         const response = await fetch(API_URL + "/api/verify", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            initData: tg.initData
-          })
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ initData: tg.initData })
         });
 
         const result = await response.json();
@@ -269,13 +222,11 @@
         if (response.status === 403) {
           heading.textContent = "Access denied";
           description.textContent =
-            "This Telegram account has not been approved.";
-          showStatus(
-            result.message ||
-            "Request access from the Telegram bot first.",
+            "Your Telegram account has not been approved.";
+          setStatus(
+            result.message || "Please request access through the bot.",
             "error"
           );
-
           requestButton.hidden = false;
           contacts.hidden = false;
           return;
@@ -283,57 +234,50 @@
 
         if (!response.ok || !result.ok || !result.access) {
           throw new Error(
-            result.error ||
-            result.message ||
-            "Unable to verify access. Please try again."
+            result.error || result.message || "Access verification failed."
           );
         }
 
         heading.textContent = "Welcome, access granted!";
         description.textContent =
-          "Your access has been verified successfully.";
-        showStatus(
-          "Your account is approved. You can now continue to Facebook.",
-          "success"
-        );
+          "Choose how you want to open Facebook.";
 
-        continueButton.hidden = false;
+        setStatus("Your account is approved.", "success");
+        approvedActions.hidden = false;
 
       } catch (error) {
-        showError(
-          error.message ||
-          "A connection error occurred. Please try again.",
-          false
-        );
-      } finally {
-        retryButton.disabled = false;
+        heading.textContent = "Unable to verify access";
+        description.textContent =
+          "Check your connection and try again.";
+
+        setStatus(error.message || "A connection error occurred.", "error");
+        retryButton.hidden = false;
+        contacts.hidden = false;
       }
     }
 
-    function openFacebook() {
+    // Option 1: Navigate within the current Mini App webview.
+    insideButton.addEventListener("click", () => {
+      window.location.assign(FACEBOOK_URL);
+    });
+
+    // Option 2: Ask Telegram to open the Facebook website externally.
+    // The phone may route the link to the installed Facebook app.
+    appButton.addEventListener("click", () => {
       if (tg && typeof tg.openLink === "function") {
         tg.openLink(FACEBOOK_URL);
       } else {
-        window.open(
-          FACEBOOK_URL,
-          "_blank",
-          "noopener,noreferrer"
-        );
+        window.open(FACEBOOK_URL, "_blank", "noopener,noreferrer");
       }
-    }
-
-    continueButton.addEventListener("click", openFacebook);
+    });
 
     retryButton.addEventListener("click", verifyAccess);
 
     requestButton.addEventListener("click", () => {
-      showStatus(
-        "Open the Telegram bot chat and send /request to request approval."
-      );
-
       if (tg && typeof tg.close === "function") {
         tg.close();
       }
+      setStatus("Return to the bot chat and send /request.");
     });
 
     verifyAccess();
