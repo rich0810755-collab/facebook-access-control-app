@@ -1,0 +1,218 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101828">
+  <title>Facebook Access Control</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; padding: 24px 16px;
+      display: flex; justify-content: center; align-items: center;
+      background: #101828; color: #f9fafb;
+      font-family: Arial, sans-serif;
+    }
+    .card {
+      width: 100%; max-width: 420px; padding: 28px;
+      border: 1px solid #344054; border-radius: 20px;
+      background: #1d2939; text-align: center;
+    }
+    .logo {
+      width: 64px; height: 64px; margin: 0 auto 18px;
+      display: grid; place-items: center; border-radius: 18px;
+      background: #1877f2; font-size: 32px; font-weight: bold;
+    }
+    h1 { font-size: 24px; margin: 8px 0 12px; }
+    p { color: #d0d5dd; line-height: 1.6; font-size: 14px; }
+    input, button {
+      width: 100%; padding: 14px; margin-top: 12px;
+      border-radius: 10px; font-size: 15px;
+    }
+    input {
+      border: 1px solid #475467; background: #101828;
+      color: white; outline: none;
+    }
+    button {
+      border: 0; background: #1877f2; color: white;
+      font-weight: bold; cursor: pointer;
+    }
+    button:disabled { opacity: .55; cursor: wait; }
+    .secondary { background: #344054; }
+    .whatsapp { background: #16834a; }
+    .status { margin-top: 18px; white-space: pre-wrap; }
+    .hidden { display: none; }
+    .small { color: #98a2b3; font-size: 12px; margin-top: 22px; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="logo">f</div>
+    <h1>Facebook Access Control</h1>
+    <p id="intro">Verify your access to continue.</p>
+
+    <section id="loading">
+      <p>Checking your access…</p>
+    </section>
+
+    <section id="denied" class="hidden">
+      <p id="deniedMessage">
+        Access denied. You need approval or a valid access code.
+      </p>
+      <input id="code" placeholder="Enter your access code"
+             autocomplete="off" maxlength="100">
+      <button id="redeem">Redeem Access Code</button>
+      <button class="secondary" id="request">Request Access in Telegram</button>
+    </section>
+
+    <section id="granted" class="hidden">
+      <h2>✅ Access Granted</h2>
+      <p id="welcome">Welcome! Your access has been verified.</p>
+      <button id="continue">Continue</button>
+    </section>
+
+    <section id="support">
+      <p>Need help? Contact support.</p>
+      <button class="secondary" id="telegramSupport">
+        Contact Support on Telegram
+      </button>
+      <button class="whatsapp" id="whatsappSupport">
+        Contact Support on WhatsApp
+      </button>
+    </section>
+
+    <p id="status" class="status" role="status"></p>
+    <p class="small">Secure access verification</p>
+  </main>
+
+  <script>
+    const API_URL = "https://facebook-access-control-new.rich0810755.workers.dev/";
+
+    const tg = window.Telegram?.WebApp;
+    const $ = id => document.getElementById(id);
+
+    const telegramSupportUrl = "https://t.me/Yangyang_pvt";
+    const whatsappSupportUrl = "https://wa.me/15795651739";
+
+    let accessGranted = false;
+
+    function show(id) {
+      ["loading", "denied", "granted"].forEach(section => {
+        $(section).classList.toggle("hidden", section !== id);
+      });
+    }
+
+    function setStatus(message) {
+      $("status").textContent = message;
+    }
+
+    async function api(path, data) {
+      if (!API_URL.startsWith("https://") ||
+          API_URL.includes("PASTE_YOUR_WORKER_URL")) {
+        throw new Error("The website administrator has not configured the Worker URL.");
+      }
+
+      const response = await fetch(API_URL.replace(/\/$/, "") + path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || result.message || "Request failed.");
+      }
+
+      return result;
+    }
+
+    async function verifyAccess() {
+      if (!tg || !tg.initData) {
+        show("denied");
+        $("deniedMessage").textContent =
+          "Please open this Mini App using the Open App button inside our Telegram bot.";
+        $("request").textContent = "Open Telegram Support";
+        $("request").onclick = () => location.href = telegramSupportUrl;
+        return;
+      }
+
+      tg.ready();
+      tg.expand();
+
+      try {
+        const result = await api("/api/verify", {
+          initData: tg.initData
+        });
+
+        accessGranted = true;
+        show("granted");
+        $("welcome").textContent = result.message || "Welcome, access granted.";
+      } catch (error) {
+        show("denied");
+        $("deniedMessage").textContent =
+          error.message.includes("administrator")
+            ? error.message
+            : "Access denied. Request approval or redeem a valid access code.";
+      }
+    }
+
+    $("redeem").addEventListener("click", async () => {
+      const code = $("code").value.trim();
+
+      if (!code) {
+        setStatus("Please enter your access code.");
+        return;
+      }
+
+      $("redeem").disabled = true;
+      setStatus("Verifying code…");
+
+      try {
+        const result = await api("/api/redeem", {
+          initData: tg?.initData || "",
+          code
+        });
+
+        accessGranted = true;
+        show("granted");
+        $("welcome").textContent = result.message || "Welcome, access granted.";
+        setStatus("");
+      } catch (error) {
+        setStatus(error.message);
+      } finally {
+        $("redeem").disabled = false;
+      }
+    });
+
+    $("request").addEventListener("click", () => {
+      if (tg) {
+        tg.close();
+      } else {
+        location.href = telegramSupportUrl;
+      }
+    });
+
+    $("continue").addEventListener("click", () => {
+      if (!accessGranted) {
+        setStatus("Access has not been verified.");
+        return;
+      }
+
+      setStatus("Your access is verified. The protected app content will be connected here.");
+    });
+
+    $("telegramSupport").addEventListener("click", () => {
+      window.open(telegramSupportUrl, "_blank", "noopener,noreferrer");
+    });
+
+    $("whatsappSupport").addEventListener("click", () => {
+      window.open(whatsappSupportUrl, "_blank", "noopener,noreferrer");
+    });
+
+    verifyAccess();
+  </script>
+</body>
+</html>
